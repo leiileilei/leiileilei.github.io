@@ -3,17 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="GLM7-based probability calculator for PHQ-9 depressive symptoms.">
-  <title>GLM7 Depression Probability Calculator</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="description" content="Research calculator estimating current clinically relevant depressive symptoms (PHQ-9 ≥10), using the frozen NHANES Logistic model.">
+  <title>GLM7 Depressive Symptom Probability Calculator</title>
+  <link rel="stylesheet" href="styles.css?v=20261002-logistic-1">
 </head>
 <body>
   <header class="app-header">
     <div>
-      <p class="eyebrow">Model 3 · Elastic Net</p>
-      <h1>GLM7 Depression Probability Calculator</h1>
+      <p class="eyebrow">Model 3 predictors · Logistic</p>
+      <h1>GLM7 Depressive Symptom Probability Calculator</h1>
+      <p class="header-context">Current PHQ-9 ≥10 · Adults aged 45 years and older</p>
     </div>
-    <span class="validation-chip">Internally validated</span>
+    <span class="validation-chip">NHANES held-out test evaluation</span>
   </header>
 
   <main class="workspace">
@@ -27,10 +28,11 @@
           <output id="glm7-value" class="glm7-output" aria-live="polite">GLM7 7.41</output>
         </div>
 
+        <p class="input-note">Default values are illustrative. Enter the participant's measurements in the displayed units. Ages 80 years and older are coded as 80 in GLM7.</p>
         <div class="field-grid metabolic-grid">
           <label class="field">
             <span>Age <small>years</small></span>
-            <input id="age" name="age" type="number" min="20" max="85" step="1" value="50" required>
+            <input id="age" name="age" type="number" min="45" max="120" step="1" value="50" required>
           </label>
           <label class="field">
             <span>BMI <small>kg/m²</small></span>
@@ -69,7 +71,7 @@
 
         <div class="field-grid profile-grid">
           <label class="field">
-            <span>Gender</span>
+            <span>Sex</span>
             <select id="gender" name="gender">
               <option value="0">Female</option>
               <option value="1">Male</option>
@@ -90,42 +92,35 @@
             </select>
           </label>
           <label class="field">
-            <span>Family size</span>
+            <span>Family size <small>7 = 7 or more</small></span>
             <input id="family-size" name="family-size" type="number" min="1" max="7" step="1" value="3" required>
           </label>
           <label class="field">
-            <span>Current smoking</span>
+            <span>Current smoking <small>≥100 lifetime cigarettes and currently smoking</small></span>
             <select id="smoke" name="smoke">
               <option value="0" selected>No</option>
               <option value="1">Yes</option>
             </select>
           </label>
           <label class="field">
-            <span>Current alcohol use</span>
+            <span>Alcohol use <small>any drinking in the past 12 months</small></span>
             <select id="drink" name="drink">
               <option value="0">No</option>
               <option value="1" selected>Yes</option>
             </select>
           </label>
           <label class="field">
-            <span>Hypertension</span>
+            <span>Hypertension <small>physician diagnosis</small></span>
             <select id="hypertension" name="hypertension">
               <option value="0" selected>No</option>
               <option value="1">Yes</option>
             </select>
           </label>
           <label class="field">
-            <span>Diabetes</span>
+            <span>Diabetes <small>physician diagnosis</small></span>
             <select id="diabetes" name="diabetes">
               <option value="0" selected>No</option>
               <option value="1">Yes</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>Physical activity</span>
-            <select id="physical-activity" name="physical-activity">
-              <option value="0">Low</option>
-              <option value="1" selected>High</option>
             </select>
           </label>
         </div>
@@ -141,44 +136,56 @@
     <aside class="result-panel" aria-labelledby="result-heading">
       <div class="result-topline">
         <p class="step-label">RESULT</p>
-        <span id="support-status" class="support-status">Within model range</span>
+        <span id="support-status" class="support-status">Awaiting calculation</span>
       </div>
-      <h2 id="result-heading">Estimated probability</h2>
+      <h2 id="result-heading">Estimated current symptom probability</h2>
+      <p class="result-context">Screening outcome: PHQ-9 ≥10</p>
 
       <div class="probability-display">
         <div id="probability-ring" class="probability-ring" style="--probability: 0deg">
           <div class="probability-ring-inner">
             <strong id="probability-value">—</strong>
-            <span>PHQ-9 symptoms</span>
+            <span>Current PHQ-9 ≥10</span>
           </div>
         </div>
       </div>
 
-      <div id="classification" class="classification neutral">
+      <div id="classification" class="classification neutral" role="status" aria-live="polite">
         Complete the fields and calculate
+      </div>
+
+      <div class="notice classification-notice">
+        <strong>A result above the threshold is not a diagnosis.</strong>
+        In the survey-weighted NHANES test analysis, only <b>12.0%</b> of participants classified above the threshold had PHQ-9 ≥10; <b>88.0%</b> did not.
+        These are group-level results, not an individual's confirmed symptom status.
       </div>
 
       <div class="threshold-block">
         <div class="threshold-row">
-          <span>Model screening threshold</span>
-          <strong id="threshold-value">5.7%</strong>
+          <span>Training-selected threshold</span>
+          <strong id="threshold-value">5.35%</strong>
         </div>
         <div class="threshold-track" aria-hidden="true">
           <span id="threshold-marker"></span>
           <span id="probability-marker"></span>
         </div>
+        <details class="threshold-method">
+          <summary>How was the threshold selected?</summary>
+          <p>The threshold was selected using only calibrated out-of-fold predictions from five-fold cross-validation in the NHANES training set. NHANES fasting subsample survey weights were used to maximize specificity while maintaining sensitivity ≥80%. The held-out test set was not used to select or adjust it.</p>
+          <p>The display is rounded to 5.35%; classification uses the full probability threshold of 0.0534945492990097. Survey weights were also used for model fitting, Platt calibration, and test performance estimates.</p>
+        </details>
       </div>
 
       <dl class="model-summary">
         <div><dt>Calculated GLM7</dt><dd id="summary-glm7">—</dd></div>
-        <div><dt>Model</dt><dd>20-model Elastic Net ensemble</dd></div>
-        <div><dt>Locked-test ROC-AUC</dt><dd>0.720</dd></div>
-        <div><dt>Locked-test PR-AUC</dt><dd>0.177</dd></div>
+        <div><dt>Model</dt><dd>Logistic · 20 imputations</dd></div>
+        <div><dt>Weighted test ROC-AUC</dt><dd>0.714</dd></div>
+        <div><dt>Weighted test PR-AUC</dt><dd>0.195</dd></div>
       </dl>
 
       <div class="notice">
         <strong>Research use only.</strong>
-        This calculator estimates concurrent PHQ-9 depressive-symptom probability. It does not diagnose depression or predict future disease.
+        This calculator estimates the probability of currently having clinically relevant depressive symptoms as indicated by PHQ-9 ≥10. It does not diagnose depression, predict future disease, or provide treatment recommendations. A below-threshold result does not rule out symptoms.
         All calculations run locally in your browser; entered values are not transmitted or stored.
       </div>
     </aside>
@@ -186,11 +193,11 @@
 
   <footer>
     <span>GLM7 = log₁₀[(Age × BMI × FBG × Insulin × TG × LDL-C) / HDL-C]</span>
-    <span>NHANES internal validation · n = 8,397</span>
+    <span>NHANES analytic sample n = 8,387 · Training n = 5,870 · Test n = 2,517</span>
   </footer>
 
-  <script src="model_data.js"></script>
-  <script src="prediction.js"></script>
-  <script src="app.js"></script>
+  <script src="model_data.js?v=20261002-logistic-1"></script>
+  <script src="prediction.js?v=20261002-logistic-1"></script>
+  <script src="app.js?v=20261002-logistic-1"></script>
 </body>
 </html>

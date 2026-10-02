@@ -32,8 +32,7 @@
       numberValue("smoke"),
       numberValue("drink"),
       numberValue("hypertension"),
-      numberValue("diabetes"),
-      numberValue("physical-activity")
+      numberValue("diabetes")
     ];
   }
 
@@ -76,11 +75,23 @@
 
     classification.className = "classification " + (result.aboveThreshold ? "above" : "below");
     classification.textContent = result.aboveThreshold
-      ? "High-risk"
-      : "Low-risk";
+      ? "At or above the model threshold"
+      : "Below the model threshold";
 
     supportStatus.className = "support-status " + (outsideSupport ? "outside" : "");
-    supportStatus.textContent = outsideSupport ? "Outside GLM7 training range" : "Within model range";
+    supportStatus.textContent = outsideSupport ? "Outside GLM7 training range" : "Within GLM7 training range";
+  }
+
+  function clearResult(message) {
+    document.getElementById("probability-value").textContent = "—";
+    document.getElementById("probability-ring").style.setProperty("--probability", "0deg");
+    document.getElementById("summary-glm7").textContent = "—";
+    document.getElementById("probability-marker").hidden = true;
+    const classification = document.getElementById("classification");
+    classification.className = "classification neutral";
+    classification.textContent = message;
+    document.getElementById("support-status").textContent = "Awaiting calculation";
+    document.getElementById("support-status").className = "support-status";
   }
 
   function calculate(event) {
@@ -90,16 +101,22 @@
       validateForm();
       const glm7 = window.GLM7Prediction.calculateGLM7(collectGLM7Components());
       const result = window.GLM7Prediction.predictProbability(collectPredictors(glm7), model);
+      document.getElementById("probability-marker").hidden = false;
       renderResult(glm7, result);
     } catch (error) {
+      clearResult("Unable to calculate; check the input values");
       errorBox.textContent = error.message;
       errorBox.hidden = false;
     }
   }
 
-  document.getElementById("threshold-value").textContent = thresholdPercent.toFixed(1) + "%";
+  document.getElementById("threshold-value").textContent = thresholdPercent.toFixed(2) + "%";
   document.getElementById("threshold-marker").style.left = thresholdPercent + "%";
-  form.addEventListener("input", updateGLM7Preview);
+  form.addEventListener("input", function () {
+    errorBox.hidden = true;
+    updateGLM7Preview();
+    clearResult("Values changed; calculate again");
+  });
   form.addEventListener("submit", calculate);
   document.getElementById("reset-button").addEventListener("click", function () {
     form.reset();

@@ -46,6 +46,17 @@ button, input, select { font: inherit; }
   letter-spacing: 0;
 }
 
+.header-context, .input-note, .result-context {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.header-context { margin: 8px 0 0; }
+.input-note { margin: -4px 0 20px; }
+.result-context { margin: 8px 0 0; }
+.field small { display: inline-block; }
+
 .eyebrow, .step-label {
   margin: 0;
   color: var(--teal);
@@ -271,6 +282,10 @@ button, input, select { font: inherit; }
 
 .threshold-row strong { color: var(--ink); font-variant-numeric: tabular-nums; }
 
+.threshold-method { margin-top: 16px; font-size: 12px; color: var(--muted); }
+.threshold-method summary { cursor: pointer; font-weight: 700; color: var(--teal-dark); }
+.threshold-method p { margin: 10px 0 0; line-height: 1.6; }
+
 .threshold-track {
   position: relative;
   height: 7px;
@@ -324,6 +339,7 @@ button, input, select { font: inherit; }
 }
 
 .notice strong { display: block; margin-bottom: 3px; }
+.classification-notice { margin-top: 12px; font-size: 12px; line-height: 1.6; }
 
 footer {
   padding: 18px clamp(20px, 4vw, 64px);
